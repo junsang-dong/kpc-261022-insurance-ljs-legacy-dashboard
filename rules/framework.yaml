@@ -1,0 +1,126 @@
+- id: RULE-FW-001
+  axis: framework
+  title: 표준프레임워크 구 패키지 경로
+  pattern: "egovframework\\.rte\\."
+  fileTypes: [java, xml, jsp]
+  severity: low
+  effortHours: 0.1
+  autoFixable: 1
+  guidance: org.egovframe.rte로 일괄 치환 (Step 2)
+
+- id: RULE-FW-010
+  axis: framework
+  title: Apache Tiles 연동 사용
+  pattern: "org\\.springframework\\.web\\.servlet\\.view\\.tiles"
+  fileTypes: [java, xml]
+  severity: high
+  effortHours: 16
+  autoFixable: 0
+  guidance: Spring 6에서 제거됨. Thymeleaf Layout 또는 JSP include 구조로 대체
+
+- id: RULE-FW-020
+  axis: framework
+  title: iBATIS SqlMap 사용 (EgovAbstractDAO, SqlMapClientFactoryBean)
+  pattern: "EgovAbstractDAO|SqlMapClient"
+  fileTypes: [java, xml]
+  severity: high
+  effortHours: 4
+  autoFixable: 0
+  guidance: MyBatis 매퍼(@Mapper 인터페이스 + mapper XML)로 전환. 예시 저장소는 4.3.x에서 제거됨
+
+- id: RULE-FW-021
+  axis: framework
+  title: springmodules Commons Validator 사용
+  pattern: "org\\.springmodules\\.validation"
+  fileTypes: [java, xml, jsp]
+  severity: high
+  effortHours: 6
+  autoFixable: 0
+  guidance: Bean Validation(@Valid + jakarta.validation 어노테이션)으로 전환. 예시 저장소는 5.0.x에서 제거됨
+
+- id: RULE-FW-022
+  axis: framework
+  title: Servlet 3.1/4.0 web.xml 스키마
+  pattern: "web-app_3_1\\.xsd|web-app_4_0\\.xsd"
+  fileTypes: [xml]
+  severity: medium
+  effortHours: 0.5
+  autoFixable: 1
+  guidance: Jakarta EE 스키마(web-app 5.0 이상)로 변경, Tomcat 10.1 이상과 함께 적용
+
+- id: RULE-FW-023
+  axis: framework
+  title: 구 JSTL taglib URI
+  pattern: "java\\.sun\\.com/jsp/jstl"
+  fileTypes: [jsp]
+  severity: info
+  effortHours: 0.1
+  autoFixable: 1
+  guidance: Jakarta JSTL 구현체를 쓰면 동작은 유지됨. 신규 URI(jakarta.tags.*)로의 정리는 선택 사항
+
+# ── 확장 규칙 (14.4절 사전 측정 항목) ──
+- id: RULE-FW-002
+  axis: framework
+  extension: true
+  title: javax.* import (jakarta 전환 대상)
+  pattern: "^\\s*import\\s+javax\\.(servlet|persistence|validation|annotation|inject|mail|jms|transaction|ws\\.rs)"
+  fileTypes: [java]
+  severity: medium
+  effortHours: 0.1
+  autoFixable: 1
+  guidance: OpenRewrite(JavaxMigrationToJakarta) 레시피로 일괄 변환 (Step 4)
+
+- id: RULE-FW-003
+  axis: framework
+  extension: true
+  title: javax 의존성 (POM)
+  pattern: "<groupId>javax\\.[a-z.]+</groupId>"
+  fileTypes: [pom]
+  severity: medium
+  effortHours: 0.2
+  autoFixable: 1
+  guidance: jakarta.* 좌표의 의존성으로 교체
+
+- id: RULE-FW-013
+  axis: framework
+  extension: true
+  title: Commons DBCP / log4jdbc 사용
+  pattern: "commons\\.dbcp|log4jdbc"
+  fileTypes: [java, xml, properties, pom]
+  severity: medium
+  effortHours: 1
+  autoFixable: 0
+  guidance: HikariCP로 전환. 주석 처리된 설정은 탐지에서 제외됨
+
+- id: RULE-FW-024
+  axis: framework
+  extension: true
+  title: "@RequestMapping(method=…) 사용"
+  pattern: "@RequestMapping\\([^)]*method\\s*="
+  fileTypes: [java]
+  severity: info
+  effortHours: 0.1
+  autoFixable: 0
+  guidance: "@GetMapping/@PostMapping 등으로 정리 (선택 사항)"
+
+- id: RULE-FW-011
+  axis: framework
+  extension: true
+  title: CommonsMultipartResolver 사용
+  pattern: "CommonsMultipartResolver"
+  fileTypes: [java, xml]
+  severity: high
+  effortHours: 4
+  autoFixable: 0
+  guidance: Spring 6에서 제거됨. StandardServletMultipartResolver 사용
+
+- id: RULE-FW-012
+  axis: framework
+  extension: true
+  title: Log4j 1.x 사용
+  pattern: "org\\.apache\\.log4j\\.|log4j:configuration"
+  fileTypes: [java, xml, properties]
+  severity: high
+  effortHours: 4
+  autoFixable: 0
+  guidance: Log4j2 또는 SLF4J + Logback으로 전환

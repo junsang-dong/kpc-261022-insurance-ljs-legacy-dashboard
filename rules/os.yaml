@@ -1,0 +1,55 @@
+- id: RULE-OS-001
+  axis: os
+  title: IBM JDK 전용 클래스 사용
+  pattern: "import com\\.ibm\\."
+  fileTypes: [java]
+  severity: high
+  effortHours: 4
+  autoFixable: 0
+  guidance: 표준 JCA 프로바이더 또는 OpenJDK API로 대체
+
+# ── 확장 규칙 (14.3절 레거시 오버레이 검증용) ──
+- id: RULE-OS-002
+  axis: os
+  extension: true
+  title: AIX 전용 명령 / ksh 셸 사용
+  pattern: "^#!\\s*/(usr/)?bin/ksh|\\b(lsattr|errpt|topas|lsvg|lslpp|oslevel|smitty)\\b"
+  fileTypes: [sh]
+  includeComments: true
+  severity: medium
+  effortHours: 2
+  autoFixable: 0
+  guidance: bash로 변환하고 Linux 대응 명령(lsblk, journalctl, top 등)으로 대체. 배치는 스케줄러로 이관
+
+- id: RULE-OS-003
+  axis: os
+  extension: true
+  title: IBM J9 전용 JVM 옵션
+  pattern: "-Xgcpolicy|-Xjit|-Xshareclasses|-Xquickstart|com\\.ibm\\.jsse2"
+  fileTypes: [txt, sh, properties]
+  severity: medium
+  effortHours: 1
+  autoFixable: 0
+  guidance: OpenJDK(HotSpot) 대응 옵션(G1/ZGC 등)으로 매핑하고 부하 테스트로 재튜닝
+
+- id: RULE-OS-004
+  axis: os
+  extension: true
+  title: 엔디언에 민감한 바이너리 I/O
+  pattern: "\\bByteBuffer\\b|\\bByteOrder\\b|\\bDataInputStream\\b|\\bDataOutputStream\\b"
+  fileTypes: [java]
+  severity: medium
+  effortHours: 2
+  autoFixable: 0
+  guidance: POWER(Big-Endian) 가정이 있는지 확인하고 ByteOrder를 명시. 파일 포맷 비교 테스트 수행
+
+- id: RULE-OS-005
+  axis: os
+  extension: true
+  title: AIX 하드코딩 경로
+  pattern: "/usr/IBM|/usr/java\\d*|/usr/IBMJava"
+  fileTypes: [java, xml, properties, sh, txt]
+  severity: low
+  effortHours: 0.5
+  autoFixable: 0
+  guidance: 경로를 설정으로 외부화

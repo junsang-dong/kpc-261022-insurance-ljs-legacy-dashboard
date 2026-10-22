@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SYNTHETIC FIXTURE - NOT FOR BUILD : AIX 7.1 / eGov 3.1 / Spring 4.0.1 / JDK 1.8 환경을 재현 -->
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>kpc.insurance</groupId>
+  <artifactId>legacy-board</artifactId>
+  <version>1.0.0</version>
+  <packaging>war</packaging>
+  <properties>
+    <egovframework.rte.version>3.1.0</egovframework.rte.version>
+    <spring.maven.artifact.version>4.0.1.RELEASE</spring.maven.artifact.version>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>egovframework.rte</groupId>
+      <artifactId>egovframework.rte.ptl.mvc</artifactId>
+      <version>${egovframework.rte.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>3.1.0</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

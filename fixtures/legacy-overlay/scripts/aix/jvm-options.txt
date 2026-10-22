@@ -1,0 +1,6 @@
+-Xms2g
+-Xmx4g
+-Xgcpolicy:gencon
+-Xshareclasses:name=legacy
+-Xquickstart
+-Dfile.encoding=EUC-KR

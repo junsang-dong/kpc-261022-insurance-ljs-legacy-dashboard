@@ -1,0 +1,9 @@
+{
+  "currency": "KRW",
+  "unitNote": "입력 단가 기준 추정치 (예시 값이며 실제 클라우드 사업자 단가가 아닙니다. 자동 조회하지 않습니다)",
+  "vcpuMonth": 35000,
+  "memGbMonth": 5000,
+  "dbTiers": { "소형": 150000, "중형": 450000, "대형": 1200000 },
+  "storageGbMonth": 150,
+  "egressGb": 120
+}

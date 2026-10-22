@@ -1,0 +1,13 @@
+{
+  "repo": "eGovFramework/egovframe-web-sample",
+  "includeGlobs": ["**/*"],
+  "excludeGlobs": ["pom-core.xml", "pom-web.xml", "**/img/**", "**/fonts/**"],
+  "refs": [
+    { "id": "overlay", "refName": "lab/legacy-overlay", "pin": null, "order": 0, "role": "overlay", "synthetic": true },
+    { "id": "4.1.x", "refName": "4.1.x", "pin": "3b3cffcb726b", "order": 1, "role": "baseline", "synthetic": false },
+    { "id": "4.2.x", "refName": "4.2.x", "pin": "e362bceeef42", "order": 2, "role": "bridge", "synthetic": false },
+    { "id": "4.3.x", "refName": "4.3.x", "pin": "d5ec49f233cd", "order": 3, "role": "bridge", "synthetic": false },
+    { "id": "5.0.x", "refName": "5.0.x", "pin": "f617f7287529", "order": 4, "role": "target", "synthetic": false },
+    { "id": "main", "refName": "main", "pin": "9dc46fdf8cc5", "order": 5, "role": "target", "synthetic": false }
+  ]
+}

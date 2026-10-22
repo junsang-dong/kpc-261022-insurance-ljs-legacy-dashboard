@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "cause": { "type": "string" },
+    "impact": { "type": "string" },
+    "replacement": { "type": "string" },
+    "codeBefore": { "type": "string" },
+    "codeAfter": { "type": "string" },
+    "cautions": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["cause", "impact", "replacement", "codeBefore", "codeAfter", "cautions"],
+  "additionalProperties": false
+}

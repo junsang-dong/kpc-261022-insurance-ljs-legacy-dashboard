@@ -1,0 +1,64 @@
+- id: RULE-JDK-003
+  axis: jdk
+  title: 문자셋을 지정하지 않은 바이트-문자열 변환
+  pattern: "new String\\([a-zA-Z_]+\\)"
+  fileTypes: [java]
+  severity: medium
+  effortHours: 0.5
+  autoFixable: 0
+  guidance: StandardCharsets 또는 Charset.forName("MS949") 등 명시
+
+- id: RULE-JDK-010
+  axis: jdk
+  title: Java 1.8 컴파일 타깃
+  pattern: "<source>1\\.8</source>|<target>1\\.8</target>"
+  fileTypes: [pom]
+  severity: medium
+  effortHours: 0.5
+  autoFixable: 1
+  guidance: maven-compiler-plugin의 <release>21</release>로 변경
+
+# ── 확장 규칙 ──
+- id: RULE-JDK-001
+  axis: jdk
+  extension: true
+  title: JDK 내부 API 사용 (sun.*, com.sun.*)
+  pattern: "import\\s+(sun\\.(misc|security|reflect)|com\\.sun\\.(crypto|org\\.apache))"
+  fileTypes: [java]
+  severity: high
+  effortHours: 6
+  autoFixable: 0
+  guidance: 공개 API로 대체. 2차 범위의 jdeps --jdk-internals 결과와 대조
+
+- id: RULE-JDK-002
+  axis: jdk
+  extension: true
+  title: JDK에서 제거된 Java EE 모듈 (JAXB, JAX-WS, JAF)
+  pattern: "import\\s+javax\\.(xml\\.bind|xml\\.ws|jws|activation)"
+  fileTypes: [java]
+  severity: medium
+  effortHours: 1
+  autoFixable: 1
+  guidance: Jakarta 대응 라이브러리를 의존성으로 추가 (Step 4의 jakarta 전환과 연계)
+
+- id: RULE-JDK-004
+  axis: jdk
+  extension: true
+  title: Nashorn 스크립트 엔진 사용
+  pattern: "\"nashorn\"|jdk\\.nashorn"
+  fileTypes: [java]
+  severity: high
+  effortHours: 8
+  autoFixable: 0
+  guidance: Java 15에서 제거됨. 서버측 JS 사용처를 GraalJS 등으로 대체
+
+- id: RULE-JDK-011
+  axis: jdk
+  extension: true
+  title: Java 17 이하 컴파일 타깃 (목표 21)
+  pattern: "<release>(8|11|17)</release>|<java\\.version>(1\\.8|8|11|17)</java\\.version>|<maven\\.compiler\\.(source|target|release)>(1\\.8|8|11|17)<"
+  fileTypes: [pom]
+  severity: medium
+  effortHours: 0.5
+  autoFixable: 1
+  guidance: java.version을 21로 재정의하고 CI java-version도 함께 변경 (14.5절)

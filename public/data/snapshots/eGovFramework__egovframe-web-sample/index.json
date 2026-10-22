@@ -1,0 +1,91 @@
+{
+ "repo": "eGovFramework/egovframe-web-sample",
+ "rulesetVersion": "2026.10.1-ac5004f2",
+ "generatedAt": "2026-10-22T06:04:11.147Z",
+ "refs": [
+  {
+   "refId": "overlay",
+   "refName": "lab/legacy-overlay",
+   "sha": "overlay-1a5fed39f441",
+   "order": 0,
+   "role": "overlay",
+   "synthetic": true,
+   "file": "overlay-1a5fed39f441.json"
+  },
+  {
+   "refId": "4.1.x",
+   "refName": "4.1.x",
+   "sha": "3b3cffcb726bde4ab87332c18fa9f0e09ecdc2ed",
+   "order": 1,
+   "role": "baseline",
+   "synthetic": false,
+   "file": "3b3cffcb726bde4ab87332c18fa9f0e09ecdc2ed.json"
+  },
+  {
+   "refId": "4.2.x",
+   "refName": "4.2.x",
+   "sha": "e362bceeef42f65293e8a33a6d0ab3a64b1e0909",
+   "order": 2,
+   "role": "bridge",
+   "synthetic": false,
+   "file": "e362bceeef42f65293e8a33a6d0ab3a64b1e0909.json"
+  },
+  {
+   "refId": "4.3.x",
+   "refName": "4.3.x",
+   "sha": "d5ec49f233cd6fc3fb0d5c440c50c6925a3a5de9",
+   "order": 3,
+   "role": "bridge",
+   "synthetic": false,
+   "file": "d5ec49f233cd6fc3fb0d5c440c50c6925a3a5de9.json"
+  },
+  {
+   "refId": "5.0.x",
+   "refName": "5.0.x",
+   "sha": "f617f72875294a2d264c472106c0afba2739d2cf",
+   "order": 4,
+   "role": "target",
+   "synthetic": false,
+   "file": "f617f72875294a2d264c472106c0afba2739d2cf.json"
+  },
+  {
+   "refId": "main",
+   "refName": "main",
+   "sha": "9dc46fdf8cc5c792e11d76da40c92b665a9e7309",
+   "order": 5,
+   "role": "target",
+   "synthetic": false,
+   "file": "9dc46fdf8cc5c792e11d76da40c92b665a9e7309.json"
+  }
+ ],
+ "diffs": [
+  {
+   "from": "4.1.x",
+   "to": "4.2.x",
+   "fromSha": "3b3cffcb726bde4ab87332c18fa9f0e09ecdc2ed",
+   "toSha": "e362bceeef42f65293e8a33a6d0ab3a64b1e0909",
+   "file": "diff-3b3cffcb726b-e362bceeef42.json"
+  },
+  {
+   "from": "4.2.x",
+   "to": "4.3.x",
+   "fromSha": "e362bceeef42f65293e8a33a6d0ab3a64b1e0909",
+   "toSha": "d5ec49f233cd6fc3fb0d5c440c50c6925a3a5de9",
+   "file": "diff-e362bceeef42-d5ec49f233cd.json"
+  },
+  {
+   "from": "4.3.x",
+   "to": "5.0.x",
+   "fromSha": "d5ec49f233cd6fc3fb0d5c440c50c6925a3a5de9",
+   "toSha": "f617f72875294a2d264c472106c0afba2739d2cf",
+   "file": "diff-d5ec49f233cd-f617f7287529.json"
+  },
+  {
+   "from": "5.0.x",
+   "to": "main",
+   "fromSha": "f617f72875294a2d264c472106c0afba2739d2cf",
+   "toSha": "9dc46fdf8cc5c792e11d76da40c92b665a9e7309",
+   "file": "diff-f617f7287529-9dc46fdf8cc5.json"
+  }
+ ]
+}

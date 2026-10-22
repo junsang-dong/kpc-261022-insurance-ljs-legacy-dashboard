@@ -1,0 +1,73 @@
+{
+  "waves": [
+    { "id": "W1", "name": "1차 웨이브 (조회성·내부용)", "start": "2027-01-11", "end": "2027-03-26", "cutoverWindow": "토 22:00 ~ 일 06:00", "rollbackCriteria": "컷오버 후 2시간 내 핵심 조회 오류율 1% 초과 시 롤백", "owner": "PM 김(가상)" },
+    { "id": "W2", "name": "2차 웨이브 (앱-DB 업무 단위)", "start": "2027-04-05", "end": "2027-07-30", "cutoverWindow": "토 22:00 ~ 일 08:00", "rollbackCriteria": "배치 기준선 대비 +10% 초과 또는 정합성 불일치 시 롤백", "owner": "PM 이(가상)" },
+    { "id": "W3", "name": "3차 웨이브 (결산·보험료 산출)", "start": "2027-09-06", "end": "2027-12-17", "cutoverWindow": "월말 마감 직후 연휴 (조정 필요)", "rollbackCriteria": "원 단위 계산 불일치 1건이라도 발생 시 롤백", "owner": "PM 박(가상)" }
+  ],
+  "dbs": [
+    { "id": "DB-BOARD", "name": "게시판 DB (HSQLDB 내장)", "engine": "HSQLDB", "sizeGb": 0.1, "license": "오픈소스", "synthetic": true },
+    { "id": "DB-CORE", "name": "코어 계약·보험료 DB", "engine": "Oracle 12c", "sizeGb": 1800, "license": "상용 (코어 기준)", "synthetic": true },
+    { "id": "DB-CUS", "name": "고객 정보 DB", "engine": "Oracle 12c", "sizeGb": 650, "license": "상용 (코어 기준)", "synthetic": true },
+    { "id": "DB-RPT", "name": "리포트 DW", "engine": "Db2 11", "sizeGb": 900, "license": "상용 (코어 기준)", "synthetic": true }
+  ],
+  "applications": [
+    {
+      "id": "SAMPLE-BOARD", "name": "게시판 (파일럿: egovframe-web-sample)", "domain": "공통", "criticality": 2, "integrationComplexity": 10,
+      "currentStep": 0, "waveId": "W1", "refIds": ["overlay", "4.1.x", "4.2.x", "4.3.x", "5.0.x", "main"], "sharedDbIds": ["DB-BOARD"], "synthetic": true,
+      "asis": { "os": "AIX 7.1 (POWER)", "jdk": "IBM J9 1.8", "egov": "3.1", "spring": "4.0.1", "was": "상용 WAS (가상)" }
+    },
+    {
+      "id": "APP-RPT-001", "name": "경영 리포트 조회", "domain": "경영지원", "criticality": 2, "integrationComplexity": 25,
+      "currentStep": 1, "waveId": "W1", "refIds": [], "sharedDbIds": ["DB-RPT"], "synthetic": true,
+      "assumedAxisScores": { "os": 20, "jdk": 25, "framework": 40, "cloud": 30 },
+      "asis": { "os": "AIX 7.1 (POWER)", "jdk": "IBM J9 1.8", "egov": "3.1", "spring": "4.0.1", "was": "상용 WAS (가상)" }
+    },
+    {
+      "id": "APP-CUS-001", "name": "고객 정보 조회", "domain": "고객", "criticality": 3, "integrationComplexity": 55,
+      "currentStep": 0, "waveId": "W2", "refIds": [], "sharedDbIds": ["DB-CUS"], "synthetic": true,
+      "assumedAxisScores": { "os": 30, "jdk": 40, "framework": 55, "cloud": 45 },
+      "asis": { "os": "AIX 7.1 (POWER)", "jdk": "IBM J9 1.8", "egov": "3.1", "spring": "4.0.1", "was": "상용 WAS (가상)" }
+    },
+    {
+      "id": "APP-AGT-001", "name": "설계사 포털", "domain": "영업", "criticality": 3, "integrationComplexity": 65,
+      "currentStep": 0, "waveId": "W2", "refIds": [], "sharedDbIds": ["DB-CUS", "DB-CORE"], "synthetic": true,
+      "assumedAxisScores": { "os": 25, "jdk": 45, "framework": 62, "cloud": 50 },
+      "asis": { "os": "AIX 7.1 (POWER)", "jdk": "IBM J9 1.8", "egov": "3.1", "spring": "4.0.1", "was": "상용 WAS (가상)" }
+    },
+    {
+      "id": "APP-CLM-001", "name": "보험금 지급 시스템", "domain": "보상", "criticality": 5, "integrationComplexity": 80,
+      "currentStep": 0, "waveId": "W3", "refIds": [], "sharedDbIds": ["DB-CORE"], "synthetic": true,
+      "assumedAxisScores": { "os": 42, "jdk": 55, "framework": 78, "cloud": 60 },
+      "asis": { "os": "AIX 7.1 (POWER)", "jdk": "IBM J9 1.8", "egov": "3.1", "spring": "4.0.1", "was": "상용 WAS (가상)" }
+    },
+    {
+      "id": "APP-PRM-001", "name": "보험료 산출", "domain": "계약", "criticality": 5, "integrationComplexity": 70,
+      "currentStep": 0, "waveId": "W3", "refIds": [], "sharedDbIds": ["DB-CORE"], "synthetic": true,
+      "assumedAxisScores": { "os": 50, "jdk": 60, "framework": 70, "cloud": 55 },
+      "asis": { "os": "AIX 7.1 (POWER)", "jdk": "IBM J9 1.8", "egov": "3.1", "spring": "4.0.1", "was": "상용 WAS (가상)" }
+    }
+  ],
+  "servers": [
+    { "id": "SRV-01", "appId": "SAMPLE-BOARD", "hostname": "aixsvr01", "os": "AIX 7.1", "arch": "POWER7", "cores": 4, "memoryGb": 16, "avgCpu": 12, "peakCpu": 35, "synthetic": true },
+    { "id": "SRV-02", "appId": "APP-CLM-001", "hostname": "aixclm01", "os": "AIX 7.1", "arch": "POWER8", "cores": 16, "memoryGb": 128, "avgCpu": 41, "peakCpu": 78, "synthetic": true },
+    { "id": "SRV-03", "appId": "APP-PRM-001", "hostname": "aixprm01", "os": "AIX 7.1", "arch": "POWER8", "cores": 12, "memoryGb": 96, "avgCpu": 38, "peakCpu": 85, "synthetic": true },
+    { "id": "SRV-04", "appId": "APP-CUS-001", "hostname": "aixcus01", "os": "AIX 7.1", "arch": "POWER7", "cores": 8, "memoryGb": 48, "avgCpu": 22, "peakCpu": 52, "synthetic": true }
+  ],
+  "integrations": [
+    { "id": "INT-01", "appId": "APP-CLM-001", "target": "금융결제원 (지급)", "type": "전문", "external": true, "ipWhitelist": true, "ready": "todo", "synthetic": true },
+    { "id": "INT-02", "appId": "APP-CLM-001", "target": "심사평가 시스템", "type": "REST", "external": false, "ipWhitelist": false, "ready": "ready", "synthetic": true },
+    { "id": "INT-03", "appId": "APP-PRM-001", "target": "보험개발원 요율 조회", "type": "전문", "external": true, "ipWhitelist": true, "ready": "requested", "synthetic": true },
+    { "id": "INT-04", "appId": "APP-AGT-001", "target": "설계사 인증 (SSO)", "type": "REST", "external": false, "ipWhitelist": false, "ready": "ready", "synthetic": true },
+    { "id": "INT-05", "appId": "APP-CUS-001", "target": "신용정보원", "type": "파일", "external": true, "ipWhitelist": true, "ready": "todo", "synthetic": true }
+  ],
+  "costInputs": [
+    { "appId": "SAMPLE-BOARD", "asisAnnual": 24000000, "containers": 2, "vcpuPerContainer": 1, "memGbPerContainer": 2, "dbTier": "소형", "dbGb": 5, "storageGb": 20, "egressGbMonth": 20, "parallelMonths": 1 },
+    { "appId": "APP-RPT-001", "asisAnnual": 60000000, "containers": 2, "vcpuPerContainer": 2, "memGbPerContainer": 4, "dbTier": "중형", "dbGb": 300, "storageGb": 100, "egressGbMonth": 300, "parallelMonths": 2 },
+    { "appId": "APP-CLM-001", "asisAnnual": 320000000, "containers": 6, "vcpuPerContainer": 4, "memGbPerContainer": 16, "dbTier": "대형", "dbGb": 1800, "storageGb": 500, "egressGbMonth": 1500, "parallelMonths": 4 }
+  ],
+  "risks": [
+    { "id": "R-001", "appId": "APP-CLM-001", "title": "지급 계산 로직의 원 단위 불일치 (인코딩·엔디언·반올림 차이)", "likelihood": 3, "impact": 5, "mitigation": "골든 마스터 전수 비교, 최종 웨이브 배치", "owner": "아키텍트 (가상)", "status": "open", "source": "manual" },
+    { "id": "R-002", "waveId": "W2", "title": "설계사 포털이 코어 DB를 공유하는데 웨이브가 달라 지연시간 증가", "likelihood": 4, "impact": 4, "mitigation": "코어 DB와 같은 웨이브로 이동하거나 전용선·캐시 적용", "owner": "인프라 (가상)", "status": "open", "source": "manual" },
+    { "id": "R-003", "appId": "APP-CUS-001", "title": "신용정보원 고정 IP 화이트리스트 변경 신청 지연", "likelihood": 3, "impact": 3, "mitigation": "NAT 고정 IP 확보 후 W2 시작 8주 전 신청", "owner": "PM (가상)", "status": "mitigating", "source": "manual" }
+  ]
+}

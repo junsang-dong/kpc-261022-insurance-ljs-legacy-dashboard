@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "regions": ["icn1"],
+  "functions": {
+    "api/scan.ts": { "maxDuration": 60, "includeFiles": "public/data/rules.json" },
+    "api/ai.ts": { "maxDuration": 120, "includeFiles": "{prompts/**,public/data/rules.json}" }
+  },
+  "rewrites": [{ "source": "/((?!api/|data/|assets/).*)", "destination": "/index.html" }]
+}

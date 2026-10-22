@@ -1,0 +1,51 @@
+- id: RULE-CL-001
+  axis: cloud
+  title: 내장(인메모리) DB 사용
+  pattern: "jdbc:embedded-database"
+  fileTypes: [xml]
+  severity: high
+  effortHours: 8
+  autoFixable: 0
+  guidance: 관리형 DB(PostgreSQL 등)로 전환하고 접속 정보는 환경변수·Secret으로 주입
+
+- id: RULE-CL-002
+  axis: cloud
+  title: 설정 파일 내 접속 계정·비밀번호 하드코딩
+  pattern: "<property name=\"(username|password)\" value=\""
+  fileTypes: [xml]
+  severity: high
+  effortHours: 2
+  autoFixable: 0
+  guidance: 외부 설정(환경변수, Kubernetes Secret, 클라우드 Secret Manager)으로 분리
+
+- id: RULE-CL-003
+  axis: cloud
+  title: 세션 기반 상태 의존 (SessionLocaleResolver, SessionStatus 등)
+  pattern: "SessionLocaleResolver|HttpSession|@SessionAttributes"
+  fileTypes: [java, xml]
+  severity: medium
+  effortHours: 3
+  autoFixable: 0
+  guidance: 수평 확장 전 세션 외부화(Spring Session + Redis) 또는 CookieLocaleResolver 등 무상태 대안 적용
+
+- id: RULE-CL-004
+  axis: cloud
+  title: 컨테이너 베이스 이미지의 JDK 버전이 목표(21)와 다름
+  pattern: "FROM .*jdk(8|11|17)"
+  fileTypes: [Dockerfile]
+  severity: medium
+  effortHours: 1
+  autoFixable: 0
+  guidance: "Java 21 기반 이미지(예: Tomcat 10.1 + JDK 21)로 교체하고 CI의 java-version도 함께 변경"
+
+# ── 확장 규칙 ──
+- id: RULE-CL-005
+  axis: cloud
+  extension: true
+  title: CI java-version이 목표(21)와 다름
+  pattern: "java-version:\\s*['\"]?(8|11|17)['\"]?\\s*$"
+  fileTypes: [yaml]
+  severity: medium
+  effortHours: 0.5
+  autoFixable: 0
+  guidance: GitHub Actions의 java-version을 21로 변경 (14.5절)

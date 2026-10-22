@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SYNTHETIC FIXTURE - NOT FOR BUILD -->
+<!DOCTYPE tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN" "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+<tiles-definitions>
+  <definition name="main.layout" template="/WEB-INF/jsp/layout/main.jsp">
+    <put-attribute name="header" value="/WEB-INF/jsp/layout/header.jsp"/>
+  </definition>
+</tiles-definitions>
