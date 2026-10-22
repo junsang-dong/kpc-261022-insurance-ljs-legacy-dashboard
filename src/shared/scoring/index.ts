@@ -29,23 +29,39 @@ export function scoreFindings(
   rules: Rule[],
   cfg: ScoringConfig,
   statuses: Record<string, FindingStatus> = {},
+  /** 있으면 findings가 잘렸더라도 이 총건수로 계산한다 (처리 상태는 보관된 항목에서 차감) */
+  ruleCounts?: Record<string, number>,
 ) {
   const byId = new Map(rules.map((r) => [r.id, r]));
   const axes = Object.fromEntries(AXES.map((a) => [a, { score: 0, raw: 0, count: 0, effortHours: 0 }])) as Record<Axis, AxisResult>;
   const perRule = new Map<string, number>();
-  for (const f of findings) {
-    if (!isActive(f)) continue;
-    const st = statuses[findingKey(refId, f)] ?? 'open';
-    if (st === 'resolved' || st === 'accepted') continue;
-    const r = byId.get(f.ruleId);
-    if (!r) continue;
-    perRule.set(r.id, (perRule.get(r.id) ?? 0) + 1);
+  const add = (ruleId: string, n: number) => {
+    const r = byId.get(ruleId);
+    if (!r || n <= 0) return;
+    perRule.set(r.id, (perRule.get(r.id) ?? 0) + n);
     const w = cfg.severityWeights[r.severity] ?? 0;
-    if (w === 0) continue; // info: 점수·공수·건수 제외, 목록에만 표시
+    if (w === 0) return; // info: 점수·공수·건수 제외, 목록에만 표시
     const a = axes[r.axis];
-    a.count++;
-    a.raw += w * (1 - r.autoFixable);
-    a.effortHours += r.effortHours * (1 - r.autoFixable);
+    a.count += n;
+    a.raw += n * w * (1 - r.autoFixable);
+    a.effortHours += n * r.effortHours * (1 - r.autoFixable);
+  };
+  if (ruleCounts) {
+    const closed = new Map<string, number>();
+    for (const f of findings) {
+      const st = statuses[findingKey(refId, f)] ?? 'open';
+      if (isActive(f) && (st === 'resolved' || st === 'accepted')) closed.set(f.ruleId, (closed.get(f.ruleId) ?? 0) + 1);
+    }
+    for (const [id, n] of Object.entries(ruleCounts)) add(id, n - (closed.get(id) ?? 0));
+  } else {
+    const open = new Map<string, number>();
+    for (const f of findings) {
+      if (!isActive(f)) continue;
+      const st = statuses[findingKey(refId, f)] ?? 'open';
+      if (st === 'resolved' || st === 'accepted') continue;
+      open.set(f.ruleId, (open.get(f.ruleId) ?? 0) + 1);
+    }
+    for (const [id, n] of open) add(id, n);
   }
   for (const a of AXES) axes[a].score = Math.min(100, Math.round((axes[a].raw / cfg.normalization[a]) * 100));
   const top: TopFinding[] = [...perRule.entries()]

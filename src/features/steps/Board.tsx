@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Alert, Card, GradeBadge, SyntheticBadge } from '../../app/ui.tsx';
-import { checkGate, scoreFindings, AXES } from '../../shared/scoring/index.ts';
+import { checkGate, AXES } from '../../shared/scoring/index.ts';
 import { STEP_NAMES, type ChecklistItem, type Risk } from '../../shared/types/index.ts';
-import { checklistFor, useAppImpacts } from '../../store/derived.ts';
+import { checklistFor, scoreRef, useAppImpacts } from '../../store/derived.ts';
 import { useWs } from '../../store/workspace.ts';
 import { AiBadge } from '../../app/ui.tsx';
 import { AiError, callAi, hashInput, useAssistant } from '../assistant/aiClient.ts';
@@ -80,7 +80,7 @@ function PlanPanel() {
 
   const input = rd
     ? (() => {
-        const sc = scoreFindings(rd.ref.id, rd.snap.findings, sd.rules, ws.scoring, ws.findingStatus);
+        const sc = scoreRef(rd, sd.rules, ws);
         return {
           ref: { repo: rd.ref.repo, refName: rd.ref.refName, sha: rd.ref.sha, synthetic: rd.ref.synthetic },
           detectedVersions: Object.fromEntries(Object.entries(rd.ref.detectedVersions).filter(([, v]) => v) as [string, string][]),

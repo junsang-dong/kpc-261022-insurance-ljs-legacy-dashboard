@@ -39,12 +39,26 @@ async function gh(path: string): Promise<Response> {
   return res;
 }
 
-export async function assertPublic(repo: string): Promise<void> {
+/** 공개 저장소인지 확인하고 기본 브랜치를 돌려준다. */
+export async function assertPublic(repo: string): Promise<{ defaultBranch: string; description: string | null; archived: boolean }> {
   const res = await gh(`/repos/${repo}`);
-  if (res.status === 404) throw new ApiError(400, '공개 저장소를 찾을 수 없습니다 (비공개 저장소는 MVP에서 지원하지 않습니다).');
+  if (res.status === 404) throw new ApiError(400, '공개 저장소를 찾을 수 없습니다 (URL을 확인하세요. 비공개 저장소는 MVP에서 지원하지 않습니다).');
   if (!res.ok) throw new ApiError(502, `GitHub 응답 오류 (${res.status})`);
-  const j = (await res.json()) as { private?: boolean };
+  const j = (await res.json()) as { private?: boolean; default_branch?: string; description?: string | null; archived?: boolean };
   if (j.private) throw new ApiError(400, '비공개 저장소는 MVP에서 분석할 수 없습니다.');
+  return { defaultBranch: j.default_branch ?? 'main', description: j.description ?? null, archived: !!j.archived };
+}
+
+/** 분석 대상 Ref 후보: 기본 브랜치 + 브랜치·태그 각 최대 50개 */
+export async function listRefs(repo: string) {
+  const meta = await assertPublic(repo);
+  const names = async (kind: 'branches' | 'tags') => {
+    const res = await gh(`/repos/${repo}/${kind}?per_page=50`);
+    if (!res.ok) return [] as string[];
+    return ((await res.json()) as { name: string }[]).map((x) => x.name);
+  };
+  const [branches, tags] = await Promise.all([names('branches'), names('tags')]);
+  return { ...meta, branches, tags };
 }
 
 export async function resolveSha(repo: string, ref: string): Promise<string> {

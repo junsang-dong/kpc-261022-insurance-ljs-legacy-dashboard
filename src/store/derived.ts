@@ -40,9 +40,14 @@ export function useAppImpacts(): { impacts: AppImpact[]; refData: Map<string, Re
     const impacts = ws.applications.map((app) => {
       const refId = primaryRefId(app, refData);
       const rd = refId ? refData.get(refId) : undefined;
-      const sc = rd ? scoreFindings(rd.ref.id, rd.snap.findings, sd.rules, ws.scoring, ws.findingStatus) : null;
+      const sc = rd ? scoreRef(rd, sd.rules, ws) : null;
       return { app, refId, impact: computeImpact(app, sc?.axes ?? null, sc?.top ?? [], ws.scoring) };
     });
     return { impacts, refData, sd, ws };
   }, [sd, ws]);
+}
+
+/** Ref의 점수 계산. 잘린 스캔(ruleCounts 있음)은 총건수로 계산한다. */
+export function scoreRef(rd: RefData, rules: StaticData['rules'], ws: Workspace) {
+  return scoreFindings(rd.ref.id, rd.snap.findings, rules, ws.scoring, ws.findingStatus, rd.snap.ruleCounts);
 }

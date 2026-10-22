@@ -1,6 +1,6 @@
-import { AXES, AXIS_LABEL, computeCost, dbWaveWarnings, scoreFindings, type Grade } from '../../shared/scoring/index.ts';
+import { AXES, AXIS_LABEL, computeCost, dbWaveWarnings, type Grade } from '../../shared/scoring/index.ts';
 import type { Axis } from '../../shared/types/index.ts';
-import type { useAppImpacts } from '../../store/derived.ts';
+import { scoreRef, type useAppImpacts } from '../../store/derived.ts';
 
 type Data = NonNullable<ReturnType<typeof useAppImpacts>>;
 
@@ -16,7 +16,7 @@ export function summaryMetrics(d: Data) {
   const refTrend = realRefs.map((r) => ({
     refId: r.ref.id,
     step: r.ref.inferredStep,
-    axes: scoreFindings(r.ref.id, r.snap.findings, sd.rules, ws.scoring, ws.findingStatus).axes,
+    axes: scoreRef(r, sd.rules, ws).axes,
   }));
   const overlays = [...refData.values()].filter((r) => r.ref.synthetic);
 

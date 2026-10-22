@@ -1,10 +1,10 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Chart, themeColors } from '../../app/Chart.tsx';
 import { Alert, Card, SeverityBadge, SyntheticBadge } from '../../app/ui.tsx';
-import { AXES, AXIS_LABEL, gapChecklist, isActive, scoreFindings, validatePair } from '../../shared/scoring/index.ts';
+import { AXES, AXIS_LABEL, gapChecklist, isActive, validatePair } from '../../shared/scoring/index.ts';
 import { STEP_NAMES } from '../../shared/types/index.ts';
-import { buildRefData } from '../../store/derived.ts';
+import { buildRefData, scoreRef } from '../../store/derived.ts';
 import { useStatic } from '../../store/staticData.ts';
 import { useWs } from '../../store/workspace.ts';
 import { useAssistant } from '../assistant/aiClient.ts';
@@ -14,14 +14,17 @@ export function RefCompare() {
   const ws = useWs((s) => s.ws);
   const setContext = useAssistant((s) => s.setContext);
   useEffect(() => setContext({ screen: 'Git Ref 비교' }), [setContext]);
+  const [repoSel, setRepoSel] = useState('');
   const refs = useMemo(() => (sd && ws ? buildRefData(sd, ws) : null), [sd, ws]);
   if (!sd || !ws || !refs) return null;
 
-  const list = [...refs.values()].sort((a, b) => a.ref.order - b.ref.order);
+  const repos = [...new Set([...refs.values()].map((r) => r.ref.repo))];
+  const repo = repos.includes(repoSel) ? repoSel : repos.includes(sd.index?.repo ?? '') ? sd.index!.repo : repos[0];
+  const list = [...refs.values()].filter((r) => r.ref.repo === repo).sort((a, b) => a.ref.order - b.ref.order);
   if (!list.length) {
     return <><h1>Git Ref 비교</h1><Alert kind="warn">스냅샷이 없습니다. <code>npm run snapshot</code> 으로 생성하거나 설정에서 라이브 스캔을 실행하세요.</Alert></>;
   }
-  const scored = new Map(list.map((r) => [r.ref.id, scoreFindings(r.ref.id, r.snap.findings, sd.rules, ws.scoring, ws.findingStatus)]));
+  const scored = new Map(list.map((r) => [r.ref.id, scoreRef(r, sd.rules, ws)]));
   const c = themeColors();
   const ruleIds = sd.rules.filter((r) => list.some((x) => x.snap.findings.some((f) => f.ruleId === r.id))).map((r) => r.id);
   const cnt = (refId: string, ruleId: string) => refs.get(refId)!.snap.findings.filter((f) => f.ruleId === ruleId && isActive(f)).length;
@@ -55,8 +58,13 @@ export function RefCompare() {
       <div className="page-head">
         <div>
           <h1>Git Ref 비교</h1>
-          <p>{sd.index?.repo} · 같은 규칙({sd.rulesetVersion})으로 분석한 Ref별 결과. 버전은 POM·web.xml·Dockerfile·CI에서 자동 추출했습니다. 괄호 안 숫자는 주석·exclude 때문에 제외된 건수입니다.</p>
+          <p>{repo} · 같은 규칙({sd.rulesetVersion})으로 분석한 Ref별 결과. 버전은 POM·web.xml·Dockerfile·CI에서 자동 추출했습니다. 괄호 안 숫자는 주석·exclude 때문에 제외된 건수입니다.</p>
         </div>
+        {repos.length > 1 && (
+          <label className="field">저장소
+            <select value={repo} onChange={(e) => setRepoSel(e.target.value)}>{repos.map((r) => <option key={r}>{r}</option>)}</select>
+          </label>
+        )}
       </div>
 
       <Card title="추출된 버전과 추정 Step">

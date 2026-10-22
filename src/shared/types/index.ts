@@ -68,6 +68,8 @@ export interface ScanResult {
   stats: ScanStats;
   findings: Finding[];
   rulesetVersion: string;
+  /** 규칙별 활성 탐지 총건수 (findings가 잘렸어도 정확). 점수 계산에 사용 */
+  ruleCounts?: Record<string, number>;
 }
 
 /** 스냅샷 파일 (public/data/snapshots/<repo>/<sha>.json) */

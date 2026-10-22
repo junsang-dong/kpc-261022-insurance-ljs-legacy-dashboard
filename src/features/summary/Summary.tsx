@@ -52,6 +52,7 @@ export function Summary() {
           <h1>요약 대시보드</h1>
           <p>예시 저장소 전환 이력과 인벤토리 현황. 점수는 의사결정 보조 지표이며 단계 게이트는 체크리스트·테스트로 판정합니다.</p>
         </div>
+        <Link className="btn primary" to="/analyze">+ 저장소 분석</Link>
       </div>
 
       {m.warnings.length > 0 && (

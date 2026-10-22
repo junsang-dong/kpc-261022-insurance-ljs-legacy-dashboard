@@ -57,7 +57,13 @@ interface State {
   saveAi: (key: string, rec: Workspace['aiResults'][string]) => void;
   setScoring: (s: ScoringConfig) => void;
   addExtraChecklist: (items: ChecklistItem[]) => void;
+  /** 저장소 분석 결과를 Ref로 저장하고, 저장소당 하나의 애플리케이션으로 자동 등록한다. 앱 ID를 반환 */
+  addAnalysis: (scan: ScanResult) => string;
+  removeAnalysis: (appId: string) => void;
 }
+
+export const analysisAppId = (repo: string) => `GH-${repo.replace('/', '__')}`;
+export const analysisRefId = (repo: string, refName: string) => `live:${repo}@${refName}`;
 
 export const useWs = create<State>((set, get) => {
   const patch = (fn: (w: Workspace) => Partial<Workspace>) => set((s) => (s.ws ? { ws: { ...s.ws, ...fn(s.ws) } } : s));
@@ -124,6 +130,51 @@ export const useWs = create<State>((set, get) => {
       }),
     saveAi: (key, rec) => patch((w) => ({ aiResults: { ...w.aiResults, [key]: rec } })),
     setScoring: (scoring) => patch(() => ({ scoring })),
+    addAnalysis(scan) {
+      const { repo, refName, sha, detectedVersions: v, inferredStep } = scan.ref;
+      const appId = analysisAppId(repo);
+      const refId = analysisRefId(repo, refName);
+      patch((w) => {
+        const existing = w.applications.find((a) => a.id === appId);
+        const sameRepoRefs = w.refs.filter((r) => r.repo === repo && r.id.startsWith('live:'));
+        const ref: GitRef = {
+          id: refId, repo, refName, sha, order: sameRepoRefs.some((r) => r.id === refId) ? sameRepoRefs.find((r) => r.id === refId)!.order : 100 + sameRepoRefs.length,
+          role: existing && existing.refIds.some((id) => id !== refId) ? 'target' : 'baseline', synthetic: false, detectedVersions: v, inferredStep,
+        };
+        const app: Application = existing
+          ? { ...existing, refIds: existing.refIds.includes(refId) ? existing.refIds : [...existing.refIds, refId] }
+          : {
+              id: appId, name: repo, domain: '외부 저장소 분석', criticality: 3, integrationComplexity: 30, currentStep: 0, refIds: [refId], sharedDbIds: [], synthetic: false,
+              asis: { os: '확인 필요 (소스로 알 수 없음)', jdk: v.java ? `Java ${v.java}` : '—', egov: v.egov ?? '—', spring: v.spring ?? '—', was: v.servlet ? `Servlet ${v.servlet}` : '—' },
+            };
+        return {
+          liveScans: { ...w.liveScans, [refId]: scan },
+          refs: w.refs.some((r) => r.id === refId) ? w.refs.map((r) => (r.id === refId ? ref : r)) : [...w.refs, ref],
+          applications: existing ? w.applications.map((a) => (a.id === appId ? app : a)) : [...w.applications, app],
+          history: entry(w, '저장소 분석', appId, `${repo}@${refName} (${sha.slice(0, 8)}) 탐지 ${Object.values(scan.ruleCounts ?? {}).reduce((a, b) => a + b, 0)}건`),
+        };
+      });
+      return appId;
+    },
+    removeAnalysis: (appId) =>
+      patch((w) => {
+        const app = w.applications.find((a) => a.id === appId);
+        if (!app) return {};
+        const refIds = new Set(app.refIds);
+        const liveScans = Object.fromEntries(Object.entries(w.liveScans).filter(([k]) => !refIds.has(k)));
+        const prefix = `${appId}:`;
+        return {
+          applications: w.applications.filter((a) => a.id !== appId),
+          refs: w.refs.filter((r) => !refIds.has(r.id)),
+          liveScans,
+          risks: w.risks.filter((r) => r.appId !== appId),
+          costInputs: w.costInputs.filter((c) => c.appId !== appId),
+          goldenMasterResults: w.goldenMasterResults.filter((g) => g.appId !== appId),
+          checklistResults: Object.fromEntries(Object.entries(w.checklistResults).filter(([k]) => !k.startsWith(prefix))),
+          findingStatus: Object.fromEntries(Object.entries(w.findingStatus).filter(([k]) => ![...refIds].some((id) => k.startsWith(`${id}:`)))),
+          history: entry(w, '분석 결과 삭제', appId),
+        };
+      }),
     addExtraChecklist: (items) =>
       patch((w) => {
         const have = new Set(w.extraChecklist.map((i) => i.id));

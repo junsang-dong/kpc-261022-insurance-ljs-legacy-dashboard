@@ -2,9 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Chart, themeColors } from '../../app/Chart.tsx';
 import { Alert, Card, GradeBadge, Progress, SeverityBadge, SyntheticBadge, Tabs, download } from '../../app/ui.tsx';
-import { AXES, AXIS_LABEL, checklistKey, checkGate, computeImpact, GRADE_ADVICE, latestGolden, scoreFindings, validateGoldenJson } from '../../shared/scoring/index.ts';
+import { AXES, AXIS_LABEL, checklistKey, checkGate, computeImpact, GRADE_ADVICE, latestGolden, validateGoldenJson } from '../../shared/scoring/index.ts';
 import { STEP_NAMES, type ChecklistItem, type Step } from '../../shared/types/index.ts';
-import { buildRefData, checklistFor, primaryRefId } from '../../store/derived.ts';
+import { buildRefData, checklistFor, primaryRefId, scoreRef } from '../../store/derived.ts';
 import { useStatic } from '../../store/staticData.ts';
 import { useWs } from '../../store/workspace.ts';
 import { useAssistant } from '../assistant/aiClient.ts';
@@ -42,10 +42,10 @@ export function AppDetail() {
   if (!sd || !ws || !app || !refs) return <p>애플리케이션을 찾을 수 없습니다. <Link to="/inventory">목록으로</Link></p>;
 
   const rd = refId ? refs.get(refId) : undefined;
-  const scored = rd ? scoreFindings(rd.ref.id, rd.snap.findings, sd.rules, ws.scoring, ws.findingStatus) : null;
+  const scored = rd ? scoreRef(rd, sd.rules, ws) : null;
   const impact = computeImpact(app, scored?.axes ?? null, scored?.top ?? [], ws.scoring);
   const cmp = cmpSel ? refs.get(cmpSel) : undefined;
-  const cmpScored = cmp ? scoreFindings(cmp.ref.id, cmp.snap.findings, sd.rules, ws.scoring, ws.findingStatus) : null;
+  const cmpScored = cmp ? scoreRef(cmp, sd.rules, ws) : null;
   const c = themeColors();
 
   const items = checklistFor(app, sd, ws, refs, refId);

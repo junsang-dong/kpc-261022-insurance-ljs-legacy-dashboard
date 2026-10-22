@@ -17,11 +17,13 @@ import { RefCompare } from '../features/refs/RefCompare.tsx';
 import { Validation } from '../features/refs/Validation.tsx';
 import { Report } from '../features/report/Report.tsx';
 import { Settings } from '../features/settings/Settings.tsx';
+import { Analyze } from '../features/analyze/Analyze.tsx';
 import type { Workspace } from '../shared/types/index.ts';
 
 const NAV: { to: string; label: string; group: string; views: Workspace['viewpoint'][] }[] = [
   { to: '/', label: '요약 대시보드', group: '현황', views: ['architect', 'pm', 'exec'] },
   { to: '/inventory', label: '인벤토리', group: '현황', views: ['architect', 'pm'] },
+  { to: '/analyze', label: '저장소 분석', group: '분석', views: ['architect', 'pm'] },
   { to: '/refs', label: 'Git Ref 비교', group: '분석', views: ['architect'] },
   { to: '/findings', label: '탐지 결과', group: '분석', views: ['architect'] },
   { to: '/validation', label: '규칙 검증', group: '분석', views: ['architect'] },
@@ -100,6 +102,7 @@ export function App() {
         <main className="page">
           <Routes>
             <Route path="/" element={<Summary />} />
+            <Route path="/analyze" element={<Analyze />} />
             <Route path="/inventory" element={<Inventory />} />
             <Route path="/apps/:id" element={<AppDetail />} />
             <Route path="/findings" element={<Findings />} />

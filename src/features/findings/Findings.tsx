@@ -79,6 +79,7 @@ export function Findings() {
           <label className="row small" style={{ alignSelf: 'end' }}><input type="checkbox" checked={suppressed} onChange={(e) => set('suppressed', e.target.checked ? '1' : '')} />억제 항목 표시 (주석·exclude)</label>
         </div>
         {rd?.ref.synthetic && <p><SyntheticBadge /> 오버레이 Ref의 결과입니다.</p>}
+        {rd?.snap.stats.truncated && <p className="alert warn">탐지가 많아 규칙당 최대 200건까지만 보관했습니다 (점수·건수는 전체 {Object.values(rd.snap.ruleCounts ?? {}).reduce((a, b) => a + b, 0).toLocaleString('ko-KR')}건 기준).</p>}
         <p className="small muted">{rows.length.toLocaleString('ko-KR')}건 · {rd ? `${rd.ref.repo} @ ${rd.ref.sha.slice(0, 12)}` : ''}</p>
         <div className="table-wrap">
           <table>

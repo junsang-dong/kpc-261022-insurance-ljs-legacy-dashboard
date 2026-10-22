@@ -6,6 +6,16 @@
 
 > 공개 저장소와 가상 데이터 전용입니다. 사내 비공개 소스·실제 계약 데이터는 입력하지 마세요.
 
+## 저장소 자동 분석 (저장소 분석 화면)
+
+공개 GitHub 저장소 URL(예: `https://github.com/owner/repo`, `.../tree/브랜치` 형식 포함)을 입력하고 **분석 시작**을 누르면 자동으로 진행됩니다.
+
+1. 저장소 확인 — 공개 여부, 기본 브랜치, 브랜치·태그 목록 (`POST /api/scan {action:"refs"}`)
+2. 소스 수신·규칙 엔진 실행 — 해당 커밋의 아카이브를 메모리에서만 해제 (`POST /api/scan`, Ref 생략 시 기본 브랜치)
+3. 결과 반영 — 저장소당 앱 1개(`GH-owner__repo`)와 Ref를 자동 등록하고 영향도·추정 Step·상위 탐지 규칙 표시
+
+URL이 없으면 소스 구조 유사성 기준의 **예시 저장소 5개**(practice-spring-study, egovframe-web-sample 4.1.x, egovframe-runtime, awesome-egovframe, spring-integration-samples)에서 고를 수 있습니다. 같은 저장소의 다른 브랜치·태그를 이어서 분석하면 같은 앱의 Ref로 추가되어 Git Ref 비교에서 전환 이력을 볼 수 있습니다. 탐지가 많은 저장소는 규칙당 최대 200건만 브라우저에 보관하되 점수는 전체 건수(`ruleCounts`)로 계산합니다.
+
 ## 빠른 시작
 
 ```bash

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Alert, Card, SyntheticBadge, Tabs, download } from '../../app/ui.tsx';
-import { isActive } from '../../shared/scoring/index.ts';
-import type { GitRef, ScanResult, ScoringConfig } from '../../shared/types/index.ts';
+import type { ScoringConfig } from '../../shared/types/index.ts';
 import { dataStore } from '../../store/dataStore.ts';
 import { useStatic } from '../../store/staticData.ts';
 import { useWs } from '../../store/workspace.ts';
@@ -28,51 +28,7 @@ export function Settings() {
 function RepoTab() {
   const { data: sd } = useStatic();
   const ws = useWs((s) => s.ws)!;
-  const addLiveScan = useWs((s) => s.addLiveScan);
-  const [repo, setRepo] = useState(sd?.refsConfig.repo ?? '');
-  const [ref, setRef] = useState('4.1.x');
-  const [exclude, setExclude] = useState((sd?.refsConfig.excludeGlobs ?? []).join('\n'));
-  const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<{ kind: 'ok' | 'bad' | 'info'; text: string } | null>(null);
   if (!sd) return null;
-
-  async function scan() {
-    setBusy(true);
-    setMsg(null);
-    try {
-      const code = getAccessCode();
-      const res = await fetch('/api/scan', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', ...(code ? { 'x-access-code': code } : {}) },
-        body: JSON.stringify({ repo, ref, includeGlobs: sd!.refsConfig.includeGlobs, excludeGlobs: exclude.split('\n').map((s) => s.trim()).filter(Boolean) }),
-      });
-      const body = await res.json();
-      if (!res.ok) throw new Error(body.error + (body.retryAt ? ` (재시도: ${new Date(body.retryAt).toLocaleTimeString('ko-KR')})` : ''));
-      const scan = body as ScanResult;
-      const known = sd!.index?.refs.find((r) => r.sha === scan.ref.sha);
-      const id = known ? `live:${known.refId}` : `live:${scan.ref.repo}@${scan.ref.refName}`;
-      const gitRef: GitRef = {
-        id, repo: scan.ref.repo, refName: scan.ref.refName, sha: scan.ref.sha, order: 100 + ws.refs.length, role: 'target', synthetic: false,
-        detectedVersions: scan.ref.detectedVersions, inferredStep: scan.ref.inferredStep,
-      };
-      addLiveScan(id, gitRef, scan);
-      let text = `스캔 완료: ${scan.stats.filesScanned}개 파일, 탐지 ${scan.findings.length}건 (${scan.stats.durationMs}ms)${scan.stats.truncated ? ' · 응답 크기 한도로 일부만 반환됨' : ''}.`;
-      if (known) {
-        const snap = sd!.snapshots[known.refId];
-        const key = (f: { ruleId: string; filePath: string; line: number }) => `${f.ruleId}|${f.filePath}|${f.line}`;
-        const a = new Set(snap.findings.filter(isActive).map(key));
-        const b = new Set(scan.findings.map(key));
-        const diff = [...a].filter((k) => !b.has(k)).length + [...b].filter((k) => !a.has(k)).length;
-        text += diff === 0 ? ` 같은 SHA(${known.refId})의 스냅샷과 탐지 결과가 일치합니다.` : ` ⚠ 같은 SHA의 스냅샷과 ${diff}건 다릅니다 (규칙셋 버전: 스냅샷 ${snap.rulesetVersion}, 라이브 ${scan.rulesetVersion}).`;
-        setMsg({ kind: diff === 0 ? 'ok' : 'bad', text });
-      } else setMsg({ kind: 'ok', text });
-    } catch (e) {
-      setMsg({ kind: 'bad', text: (e as Error).message });
-    } finally {
-      setBusy(false);
-    }
-  }
-
   const live = ws.refs.filter((r) => r.id.startsWith('live:'));
   return (
     <div className="grid cols-2">
@@ -84,17 +40,10 @@ function RepoTab() {
           ))}</tbody>
         </table>
         <p className="small muted">스냅샷은 <code>npm run snapshot</code> 으로 고정 SHA 기준 재생성합니다. exclude glob: <code>{(sd.refsConfig.excludeGlobs).join(', ')}</code></p>
-        {live.length > 0 && (<><h3>라이브 스캔 결과</h3><ul className="small">{live.map((r) => <li key={r.id}>{r.repo} @ {r.refName} ({r.sha.slice(0, 8)})</li>)}</ul></>)}
       </Card>
-      <Card title="라이브 스캔 (공개 GitHub 저장소)">
-        <Alert kind="info">공개 저장소만 분석합니다. 서버리스 함수가 해당 커밋의 아카이브를 메모리에서만 해제해 규칙을 실행하고, 소스는 저장하지 않습니다.</Alert>
-        <label className="field">저장소 (owner/name)<input type="text" value={repo} onChange={(e) => setRepo(e.target.value)} /></label>
-        <label className="field" style={{ marginTop: 8 }}>Ref (브랜치·태그·SHA)<input type="text" value={ref} onChange={(e) => setRef(e.target.value)} /></label>
-        <label className="field" style={{ marginTop: 8 }}>exclude glob (줄마다 하나)<textarea rows={4} value={exclude} onChange={(e) => setExclude(e.target.value)} /></label>
-        <div className="row" style={{ marginTop: 8 }}>
-          <button className="btn primary" disabled={busy || !repo.trim() || !ref.trim()} onClick={scan}>{busy ? '스캔 중…' : '라이브 스캔 실행'}</button>
-        </div>
-        {msg && <Alert kind={msg.kind}>{msg.text}</Alert>}
+      <Card title="라이브 분석 (공개 GitHub 저장소)">
+        <p>임의의 공개 저장소는 <Link to="/analyze">저장소 분석</Link> 화면에서 URL만 입력하면 자동으로 분석됩니다. 예시 저장소 5개도 그곳에서 고를 수 있습니다.</p>
+        {live.length > 0 ? (<><h3>분석한 Ref ({live.length})</h3><ul className="small">{live.map((r) => <li key={r.id}>{r.repo} @ {r.refName} ({r.sha.slice(0, 8)})</li>)}</ul></>) : <p className="muted small">아직 분석한 저장소가 없습니다.</p>}
       </Card>
     </div>
   );
