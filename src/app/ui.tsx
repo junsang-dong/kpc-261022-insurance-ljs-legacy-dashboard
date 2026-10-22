@@ -25,6 +25,16 @@ export function Stat({ label, value, sub }: { label: string; value: ReactNode; s
   );
 }
 
+/** 지표 도움말: 접이식. 의미·계산식·읽는 법을 차트 바로 아래에 둔다. */
+export function Help({ title = '이 지표는? (의미와 계산 방식)', children }: { title?: string; children: ReactNode }) {
+  return (
+    <details className="help">
+      <summary>ⓘ {title}</summary>
+      <div className="help-body">{children}</div>
+    </details>
+  );
+}
+
 export const SyntheticBadge = ({ text = '가상 데이터' }: { text?: string }) => <span className="badge b-synthetic" title="실제 시스템이 아닌 가상 값입니다">◇ {text}</span>;
 
 export function AiBadge({ model, at }: { model?: string; at?: string }) {
